@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="busca.js" defer></script>
+</head>
+
+<body class="pagina-busca">
+
+    <main class="capa">
+
+        <div class="pokebola" aria-hidden="true"></div>
+
+        <h1 class="capa-titulo">Pokédex</h1>
+        <p class="capa-subtitulo">Procure um Pokémon pelo nome ou pelo número da Pokédex nacional.</p>
+
+        <div class="busca">
+            <input
+                type="text"
+                id="campo-busca"
+                class="busca-campo"
+                placeholder="Ex.: pikachu ou 25"
+                autocomplete="off"
+                aria-label="Nome ou número do Pokémon"
+            >
+            <button id="botao-busca" class="busca-botao" type="button">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                Buscar
+            </button>
+        </div>
+
+        <p id="mensagem-erro" class="mensagem-erro" role="alert" hidden></p>
+
+        <div class="sugestoes">
+            <span>Tente:</span>
+            <button class="sugestao" type="button" data-busca="pikachu">pikachu</button>
+            <button class="sugestao" type="button" data-busca="6">6</button>
+            <button class="sugestao" type="button" data-busca="gengar">gengar</button>
+            <button class="sugestao" type="button" data-busca="lucario">lucario</button>
+        </div>
+
+    </main>
+
+</body>
+
+</html>
