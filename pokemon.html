@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <script src="busca.js" defer></script>
+    <script src="pokemon.js" defer></script>
+</head>
+
+<body class="pagina-pokemon">
+
+    <header class="topo">
+        <a href="index.html" class="topo-logo">
+            <i class="fa-solid fa-arrow-left"></i>
+            Pokédex
+        </a>
+
+        <div class="busca busca-compacta">
+            <input
+                type="text"
+                id="campo-busca"
+                class="busca-campo"
+                placeholder="Buscar outro Pokémon"
+                autocomplete="off"
+                aria-label="Nome ou número do Pokémon"
+            >
+            <button id="botao-busca" class="busca-botao" type="button" aria-label="Buscar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </div>
+    </header>
+
+    <p id="mensagem-erro" class="mensagem-erro mensagem-erro-topo" role="alert" hidden></p>
+
+    <main class="conteudo">
+
+        <p id="carregando" class="carregando">Carregando Pokémon...</p>
+
+        <div id="aviso" class="aviso" hidden>
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <p id="aviso-texto"></p>
+            <a href="index.html" class="aviso-link">Voltar para a busca</a>
+        </div>
+
+        <article id="ficha" class="ficha" hidden>
+
+            <section class="ficha-topo">
+                <figure class="ficha-arte">
+                    <img id="arte" src="" alt="">
+                </figure>
+
+                <div class="ficha-identidade">
+                    <span id="numero" class="ficha-numero"></span>
+                    <h1 id="nome" class="ficha-nome"></h1>
+                    <p id="categoria" class="ficha-categoria"></p>
+                    <div id="tipos" class="tipos"></div>
+                </div>
+            </section>
+
+            <p id="descricao" class="ficha-descricao"></p>
+
+            <table class="medidas">
+                <thead>
+                    <tr>
+                        <th><i class="fa-solid fa-ruler-vertical"></i> Altura</th>
+                        <th><i class="fa-solid fa-weight-hanging"></i> Peso</th>
+                        <th><i class="fa-solid fa-star"></i> Experiência base</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="altura"></td>
+                        <td id="peso"></td>
+                        <td id="experiencia"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="ficha-blocos">
+                <section class="bloco">
+                    <h2>Status base</h2>
+                    <div id="lista-status" class="lista-status"></div>
+                    <p class="status-total">Total <strong id="status-total"></strong></p>
+                </section>
+
+                <section class="bloco">
+                    <h2>Habilidades</h2>
+                    <ul id="habilidades" class="habilidades"></ul>
+                </section>
+            </div>
+
+        </article>
+
+    </main>
+
+</body>
+
+</html>
