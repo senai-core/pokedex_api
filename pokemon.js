@@ -63,24 +63,32 @@ function formatarNome(nome) {
         .join(" ");
 }
 
-function formatarDecimal(valor) {
+function formatarMedida(valor) {
     return valor.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
-function formatarNumero(id) {
-    return `Nº ${String(id).padStart(4, "0")}`;
+function emMetros(decimetros) {
+    return formatarMedida(decimetros / 10);
 }
 
-function textoEmPortuguesOuIngles(lista, campo) {
-    const emPortugues = lista.find((item) => item.language.name === "pt-br");
-    const emIngles = lista.find((item) => item.language.name === "en");
+function emQuilos(hectogramas) {
+    return formatarMedida(hectogramas / 10);
+}
+
+function formatarNumeroDaPokedex(numero) {
+    return `Nº ${String(numero).padStart(4, "0")}`;
+}
+
+function textoEmPortuguesOuIngles(textos, campoDeTexto) {
+    const emPortugues = textos.find((texto) => texto.language.name === "pt-br");
+    const emIngles = textos.find((texto) => texto.language.name === "en");
     const escolhido = emPortugues ?? emIngles;
 
     if (!escolhido) {
         return "";
     }
 
-    return escolhido[campo].replace(/\s+/g, " ").trim();
+    return escolhido[campoDeTexto].replace(/\s+/g, " ").trim();
 }
 
 function preencherIdentidade(pokemon) {
@@ -91,7 +99,7 @@ function preencherIdentidade(pokemon) {
     arte.alt = `Arte oficial de ${nome}`;
 
     document.title = `${nome} | Pokédex`;
-    document.getElementById("numero").textContent = formatarNumero(pokemon.id);
+    document.getElementById("numero").textContent = formatarNumeroDaPokedex(pokemon.id);
     document.getElementById("nome").textContent = nome;
 }
 
@@ -110,13 +118,13 @@ function aplicarTemaDoTipo(tipoPrincipal) {
 }
 
 function preencherMedidas(pokemon) {
-    document.getElementById("altura").textContent = `${formatarDecimal(pokemon.height / 10)} m`;
-    document.getElementById("peso").textContent = `${formatarDecimal(pokemon.weight / 10)} kg`;
+    document.getElementById("altura").textContent = `${emMetros(pokemon.height)} m`;
+    document.getElementById("peso").textContent = `${emQuilos(pokemon.weight)} kg`;
     document.getElementById("experiencia").textContent = pokemon.base_experience ?? "—";
 }
 
 function criarLinhaDeStatus(stat, valor) {
-    const info = INFO_DOS_STATUS[stat.name] ?? { nome: formatarNome(stat.name), icone: "fa-circle" };
+    const infoDoStatus = INFO_DOS_STATUS[stat.name] ?? { nome: formatarNome(stat.name), icone: "fa-circle" };
     const linha = criarElemento("div", "status");
     const trilho = criarElemento("div", "status-trilho");
     const barra = criarElemento("div", "status-barra");
@@ -125,8 +133,8 @@ function criarLinhaDeStatus(stat, valor) {
     trilho.appendChild(barra);
 
     linha.append(
-        criarElemento("i", `fa-solid ${info.icone} status-icone`),
-        criarElemento("span", "status-nome", info.nome),
+        criarElemento("i", `fa-solid ${infoDoStatus.icone} status-icone`),
+        criarElemento("span", "status-nome", infoDoStatus.nome),
         criarElemento("span", "status-valor", valor),
         trilho
     );

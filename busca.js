@@ -14,12 +14,21 @@ function esconderErro() {
 
 function normalizarBusca(texto) {
     const termo = texto.trim().toLowerCase().replace(/\s+/g, "-");
+    const buscaPorNumero = /^\d+$/.test(termo);
 
-    if (/^\d+$/.test(termo)) {
+    if (buscaPorNumero) {
         return String(Number(termo));
     }
 
     return termo;
+}
+
+function textoDaFalha(erro, digitado) {
+    if (erro instanceof PokemonNaoEncontrado) {
+        return `Nenhum Pokémon encontrado para "${digitado}".`;
+    }
+
+    return "Não foi possível falar com a PokéAPI. Confira sua internet e tente de novo.";
 }
 
 async function abrirPokemonDigitado() {
@@ -40,11 +49,7 @@ async function abrirPokemonDigitado() {
 
         window.location.href = `pokemon.html?id=${pokemon.id}`;
     } catch (erro) {
-        if (erro instanceof PokemonNaoEncontrado) {
-            mostrarErro(`Nenhum Pokémon encontrado para "${digitado}".`);
-        } else {
-            mostrarErro("Não foi possível falar com a PokéAPI. Confira sua internet e tente de novo.");
-        }
+        mostrarErro(textoDaFalha(erro, digitado));
     } finally {
         botaoBusca.disabled = false;
     }
