@@ -35,11 +35,25 @@ const aviso = document.getElementById("aviso");
 const avisoTexto = document.getElementById("aviso-texto");
 const ficha = document.getElementById("ficha");
 
+function criarElemento(tag, classes, texto = "") {
+    const elemento = document.createElement(tag);
+
+    elemento.className = classes;
+    elemento.textContent = texto;
+
+    return elemento;
+}
+
 function mostrarAviso(texto) {
     carregando.hidden = true;
     ficha.hidden = true;
     avisoTexto.textContent = texto;
     aviso.hidden = false;
+}
+
+function mostrarFicha() {
+    carregando.hidden = true;
+    ficha.hidden = false;
 }
 
 function formatarNome(nome) {
@@ -49,38 +63,32 @@ function formatarNome(nome) {
         .join(" ");
 }
 
-function formatarDecimal(valor) {
+function formatarMedida(valor) {
     return valor.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
-function formatarNumero(id) {
-    return `Nº ${String(id).padStart(4, "0")}`;
+function emMetros(decimetros) {
+    return formatarMedida(decimetros / 10);
 }
 
-function textoEmPortuguesOuIngles(lista, campo) {
-    const emPortugues = lista.find((item) => item.language.name === "pt-br");
-    const emIngles = lista.find((item) => item.language.name === "en");
+function emQuilos(hectogramas) {
+    return formatarMedida(hectogramas / 10);
+}
+
+function formatarNumeroDaPokedex(numero) {
+    return `Nº ${String(numero).padStart(4, "0")}`;
+}
+
+function textoEmPortuguesOuIngles(textos, campoDeTexto) {
+    const emPortugues = textos.find((texto) => texto.language.name === "pt-br");
+    const emIngles = textos.find((texto) => texto.language.name === "en");
     const escolhido = emPortugues ?? emIngles;
 
     if (!escolhido) {
         return "";
     }
 
-    return escolhido[campo].replace(/\s+/g, " ").trim();
-}
-
-async function buscarEspecie(url) {
-    try {
-        const resposta = await fetch(url);
-
-        if (!resposta.ok) {
-            return null;
-        }
-
-        return await resposta.json();
-    } catch (erro) {
-        return null;
-    }
+    return escolhido[campoDeTexto].replace(/\s+/g, " ").trim();
 }
 
 function preencherIdentidade(pokemon) {
@@ -91,7 +99,7 @@ function preencherIdentidade(pokemon) {
     arte.alt = `Arte oficial de ${nome}`;
 
     document.title = `${nome} | Pokédex`;
-    document.getElementById("numero").textContent = formatarNumero(pokemon.id);
+    document.getElementById("numero").textContent = formatarNumeroDaPokedex(pokemon.id);
     document.getElementById("nome").textContent = nome;
 }
 
@@ -99,74 +107,66 @@ function preencherTipos(tipos) {
     const listaTipos = document.getElementById("tipos");
 
     tipos.forEach(({ type }) => {
-        const etiqueta = document.createElement("span");
-        etiqueta.classList.add("tipo", `tipo-${type.name}`);
-        etiqueta.textContent = NOMES_DOS_TIPOS[type.name] ?? formatarNome(type.name);
-        listaTipos.appendChild(etiqueta);
-    });
+        const nomeDoTipo = NOMES_DOS_TIPOS[type.name] ?? formatarNome(type.name);
 
-    document.body.classList.add(`tema-${tipos[0].type.name}`);
+        listaTipos.appendChild(criarElemento("span", `tipo tipo-${type.name}`, nomeDoTipo));
+    });
+}
+
+function aplicarTemaDoTipo(tipoPrincipal) {
+    document.body.classList.add(`tema-${tipoPrincipal}`);
 }
 
 function preencherMedidas(pokemon) {
-    document.getElementById("altura").textContent = `${formatarDecimal(pokemon.height / 10)} m`;
-    document.getElementById("peso").textContent = `${formatarDecimal(pokemon.weight / 10)} kg`;
+    document.getElementById("altura").textContent = `${emMetros(pokemon.height)} m`;
+    document.getElementById("peso").textContent = `${emQuilos(pokemon.weight)} kg`;
     document.getElementById("experiencia").textContent = pokemon.base_experience ?? "—";
+}
+
+function criarLinhaDeStatus(stat, valor) {
+    const infoDoStatus = INFO_DOS_STATUS[stat.name] ?? { nome: formatarNome(stat.name), icone: "fa-circle" };
+    const linha = criarElemento("div", "status");
+    const trilho = criarElemento("div", "status-trilho");
+    const barra = criarElemento("div", "status-barra");
+
+    barra.style.width = `${Math.min(valor / STATUS_MAXIMO, 1) * 100}%`;
+    trilho.appendChild(barra);
+
+    linha.append(
+        criarElemento("i", `fa-solid ${infoDoStatus.icone} status-icone`),
+        criarElemento("span", "status-nome", infoDoStatus.nome),
+        criarElemento("span", "status-valor", valor),
+        trilho
+    );
+
+    return linha;
+}
+
+function somarStatus(stats) {
+    return stats.reduce((total, { base_stat }) => total + base_stat, 0);
 }
 
 function preencherStatus(stats) {
     const listaStatus = document.getElementById("lista-status");
-    let total = 0;
 
     stats.forEach(({ stat, base_stat }) => {
-        const info = INFO_DOS_STATUS[stat.name] ?? { nome: formatarNome(stat.name), icone: "fa-circle" };
-        total += base_stat;
-
-        const linha = document.createElement("div");
-        linha.classList.add("status");
-
-        const icone = document.createElement("i");
-        icone.classList.add("fa-solid", info.icone, "status-icone");
-
-        const nome = document.createElement("span");
-        nome.classList.add("status-nome");
-        nome.textContent = info.nome;
-
-        const valor = document.createElement("span");
-        valor.classList.add("status-valor");
-        valor.textContent = base_stat;
-
-        const trilho = document.createElement("div");
-        trilho.classList.add("status-trilho");
-
-        const barra = document.createElement("div");
-        barra.classList.add("status-barra");
-        barra.style.width = `${Math.min(base_stat / STATUS_MAXIMO, 1) * 100}%`;
-
-        trilho.appendChild(barra);
-        linha.append(icone, nome, valor, trilho);
-        listaStatus.appendChild(linha);
+        listaStatus.appendChild(criarLinhaDeStatus(stat, base_stat));
     });
 
-    document.getElementById("status-total").textContent = total;
+    document.getElementById("status-total").textContent = somarStatus(stats);
 }
 
 function preencherHabilidades(habilidades) {
-    const lista = document.getElementById("habilidades");
+    const listaHabilidades = document.getElementById("habilidades");
 
     habilidades.forEach(({ ability, is_hidden }) => {
-        const item = document.createElement("li");
-        item.classList.add("habilidade");
-        item.textContent = formatarNome(ability.name);
+        const item = criarElemento("li", "habilidade", formatarNome(ability.name));
 
         if (is_hidden) {
-            const selo = document.createElement("span");
-            selo.classList.add("habilidade-oculta");
-            selo.textContent = "oculta";
-            item.appendChild(selo);
+            item.appendChild(criarElemento("span", "habilidade-oculta", "oculta"));
         }
 
-        lista.appendChild(item);
+        listaHabilidades.appendChild(item);
     });
 }
 
@@ -184,8 +184,22 @@ function preencherEspecie(especie) {
     descricao.textContent = textoEmPortuguesOuIngles(especie.flavor_text_entries, "flavor_text") || "Sem descrição cadastrada.";
 }
 
+function preencherFicha(pokemon, especie) {
+    preencherIdentidade(pokemon);
+    preencherTipos(pokemon.types);
+    aplicarTemaDoTipo(pokemon.types[0].type.name);
+    preencherMedidas(pokemon);
+    preencherStatus(pokemon.stats);
+    preencherHabilidades(pokemon.abilities);
+    preencherEspecie(especie);
+}
+
+function idDaUrl() {
+    return new URLSearchParams(window.location.search).get("id");
+}
+
 async function carregarPokemon() {
-    const id = new URLSearchParams(window.location.search).get("id");
+    const id = idDaUrl();
 
     if (!id) {
         mostrarAviso("Nenhum Pokémon foi informado. Volte e faça uma busca.");
@@ -193,31 +207,17 @@ async function carregarPokemon() {
     }
 
     try {
-        const resposta = await fetch(`${API_URL}/pokemon/${encodeURIComponent(id)}`);
-
-        if (resposta.status === 404) {
-            mostrarAviso(`Não existe Pokémon com o identificador "${id}".`);
-            return;
-        }
-
-        if (!resposta.ok) {
-            throw new Error(`Erro ${resposta.status}`);
-        }
-
-        const pokemon = await resposta.json();
+        const pokemon = await buscarPokemon(id);
         const especie = await buscarEspecie(pokemon.species.url);
 
-        preencherIdentidade(pokemon);
-        preencherTipos(pokemon.types);
-        preencherMedidas(pokemon);
-        preencherStatus(pokemon.stats);
-        preencherHabilidades(pokemon.abilities);
-        preencherEspecie(especie);
-
-        carregando.hidden = true;
-        ficha.hidden = false;
+        preencherFicha(pokemon, especie);
+        mostrarFicha();
     } catch (erro) {
-        mostrarAviso("Não foi possível carregar os dados da PokéAPI. Confira sua internet e tente de novo.");
+        if (erro instanceof PokemonNaoEncontrado) {
+            mostrarAviso(`Não existe Pokémon com o identificador "${id}".`);
+        } else {
+            mostrarAviso("Não foi possível carregar os dados da PokéAPI. Confira sua internet e tente de novo.");
+        }
     }
 }
 
