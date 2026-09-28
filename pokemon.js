@@ -69,20 +69,6 @@ function textoEmPortuguesOuIngles(lista, campo) {
     return escolhido[campo].replace(/\s+/g, " ").trim();
 }
 
-async function buscarEspecie(url) {
-    try {
-        const resposta = await fetch(url);
-
-        if (!resposta.ok) {
-            return null;
-        }
-
-        return await resposta.json();
-    } catch (erro) {
-        return null;
-    }
-}
-
 function preencherIdentidade(pokemon) {
     const nome = formatarNome(pokemon.name);
     const arte = document.getElementById("arte");
@@ -193,18 +179,7 @@ async function carregarPokemon() {
     }
 
     try {
-        const resposta = await fetch(`${API_URL}/pokemon/${encodeURIComponent(id)}`);
-
-        if (resposta.status === 404) {
-            mostrarAviso(`Não existe Pokémon com o identificador "${id}".`);
-            return;
-        }
-
-        if (!resposta.ok) {
-            throw new Error(`Erro ${resposta.status}`);
-        }
-
-        const pokemon = await resposta.json();
+        const pokemon = await buscarPokemon(id);
         const especie = await buscarEspecie(pokemon.species.url);
 
         preencherIdentidade(pokemon);
@@ -217,7 +192,11 @@ async function carregarPokemon() {
         carregando.hidden = true;
         ficha.hidden = false;
     } catch (erro) {
-        mostrarAviso("Não foi possível carregar os dados da PokéAPI. Confira sua internet e tente de novo.");
+        if (erro instanceof PokemonNaoEncontrado) {
+            mostrarAviso(`Não existe Pokémon com o identificador "${id}".`);
+        } else {
+            mostrarAviso("Não foi possível carregar os dados da PokéAPI. Confira sua internet e tente de novo.");
+        }
     }
 }
 

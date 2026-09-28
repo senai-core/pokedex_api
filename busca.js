@@ -1,5 +1,3 @@
-const API_URL = "https://pokeapi.co/api/v2";
-
 const campoBusca = document.getElementById("campo-busca");
 const botaoBusca = document.getElementById("botao-busca");
 const mensagemErro = document.getElementById("mensagem-erro");
@@ -24,7 +22,7 @@ function normalizarBusca(texto) {
     return termo;
 }
 
-async function buscarPokemon() {
+async function abrirPokemonDigitado() {
     const digitado = campoBusca.value.trim();
     const termo = normalizarBusca(digitado);
 
@@ -38,38 +36,31 @@ async function buscarPokemon() {
     botaoBusca.disabled = true;
 
     try {
-        const resposta = await fetch(`${API_URL}/pokemon/${encodeURIComponent(termo)}`);
-
-        if (resposta.status === 404) {
-            mostrarErro(`Nenhum Pokémon encontrado para "${digitado}".`);
-            return;
-        }
-
-        if (!resposta.ok) {
-            throw new Error(`Erro ${resposta.status}`);
-        }
-
-        const pokemon = await resposta.json();
+        const pokemon = await buscarPokemon(termo);
 
         window.location.href = `pokemon.html?id=${pokemon.id}`;
     } catch (erro) {
-        mostrarErro("Não foi possível falar com a PokéAPI. Confira sua internet e tente de novo.");
+        if (erro instanceof PokemonNaoEncontrado) {
+            mostrarErro(`Nenhum Pokémon encontrado para "${digitado}".`);
+        } else {
+            mostrarErro("Não foi possível falar com a PokéAPI. Confira sua internet e tente de novo.");
+        }
     } finally {
         botaoBusca.disabled = false;
     }
 }
 
-botaoBusca.addEventListener("click", buscarPokemon);
+botaoBusca.addEventListener("click", abrirPokemonDigitado);
 
 campoBusca.addEventListener("keydown", (evento) => {
     if (evento.key === "Enter") {
-        buscarPokemon();
+        abrirPokemonDigitado();
     }
 });
 
 document.querySelectorAll(".sugestao").forEach((botao) => {
     botao.addEventListener("click", () => {
         campoBusca.value = botao.dataset.busca;
-        buscarPokemon();
+        abrirPokemonDigitado();
     });
 });
